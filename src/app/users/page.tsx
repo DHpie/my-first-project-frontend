@@ -1,6 +1,8 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import type { User, UserCreateRequest, UserUpdateRequest } from '../types/user';
-import { getUsers, createUser, updateUser, deleteUser } from '../api/user';
+import type { User, UserCreateRequest, UserUpdateRequest } from '@/types/user';
+import { getUsers, createUser, updateUser, deleteUser } from '@/api/user';
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
