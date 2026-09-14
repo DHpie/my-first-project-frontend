@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: 'My First Project',
-  description: 'Enterprise fullstack MVP - User Management',
+  title: 'ChinaBuddy',
+  description: 'Discover China Like a Local',
 };
 
 export default function RootLayout({
@@ -17,10 +17,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body>
-        <div id="root">
-          {children}
-        </div>
+      <body className={cn("bg-background text-foreground", geist.variable)}>
+        {children}
       </body>
     </html>
   );

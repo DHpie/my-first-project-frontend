@@ -1,8 +1,28 @@
+import SkipToContent from "@/components/layout/skip-to-content";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-3xl font-bold text-primary">ChinaBuddy</h1>
-      <p className="mt-4 text-lg text-muted-foreground">Welcome</p>
-    </main>
+    <>
+      <SkipToContent />
+      <Header />
+
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-[50vh] px-4 pt-2 md:max-w-[1200px] md:mx-auto md:px-0"
+      >
+        {/* Hero Section */}
+
+        {/* Navigation Section */}
+
+        {/* Destinations Section */}
+
+        {/* Community Section */}
+      </main>
+
+      <Footer />
+    </>
   );
 }
