@@ -31,7 +31,7 @@ export default function HeroSection({
   return (
     <section
       aria-label="Hero"
-      className="relative min-h-[300px] md:min-h-[500px] bg-[#1a1a2e]"
+      className="relative min-h-[360px] md:min-h-[540px]"
     >
       {/* Background Image */}
       <div className="absolute inset-0">
@@ -39,11 +39,24 @@ export default function HeroSection({
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 py-6 md:py-12 md:max-w-[1200px] md:mx-auto min-h-[300px] md:min-h-[500px]">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white text-center mb-4">
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 py-6 md:py-12 md:max-w-[1200px] md:mx-auto min-h-[360px] md:min-h-[540px]">
+        <h1
+          className="text-3xl md:text-5xl lg:text-6xl font-bold text-white text-center mb-4"
+          style={{
+            textShadow: "0 2px 12px rgba(0,0,0,0.4)",
+            animation:
+              "fade-slide-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both",
+          }}
+        >
           {headline}
         </h1>
-        <p className="text-base md:text-lg text-white/90 text-center mb-8 max-w-2xl">
+        <p
+          className="text-base md:text-lg text-white/95 text-center mb-8 max-w-2xl tracking-wide"
+          style={{
+            animation:
+              "fade-slide-up 500ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both",
+          }}
+        >
           {subtitle}
         </p>
         <SearchForm />
