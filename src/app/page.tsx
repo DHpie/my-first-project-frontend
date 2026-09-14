@@ -1,6 +1,10 @@
 import SkipToContent from "@/components/layout/skip-to-content";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import HeroSection from "@/components/hero/hero-section";
+import NavigationSection from "@/components/navigation/navigation-section";
+import DestinationsSection from "@/components/destinations/destinations-section";
+import CommunitySection from "@/components/community/community-section";
 
 export default function Home() {
   return (
@@ -13,13 +17,13 @@ export default function Home() {
         tabIndex={-1}
         className="min-h-[50vh] px-4 pt-2 md:max-w-[1200px] md:mx-auto md:px-0"
       >
-        {/* Hero Section */}
+        <HeroSection backgroundImage="/hero.png" />
 
-        {/* Navigation Section */}
+        <NavigationSection />
 
-        {/* Destinations Section */}
+        <DestinationsSection />
 
-        {/* Community Section */}
+        <CommunitySection />
       </main>
 
       <Footer />
