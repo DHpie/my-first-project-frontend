@@ -10,9 +10,12 @@ export interface Destination {
   popularityTag: string;
 }
 
-export async function getFeaturedDestinations(): Promise<Destination[]> {
+export async function getFeaturedDestinations(
+  signal?: AbortSignal
+): Promise<Destination[]> {
   const response = await request.get<Result<Destination[]>>(
-    "/api/destinations/featured"
+    "/api/destinations/featured",
+    { signal }
   );
   return response.data.data;
 }

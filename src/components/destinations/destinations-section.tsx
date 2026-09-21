@@ -12,8 +12,8 @@ const MAX_CARDS = 6;
 function SkeletonCard() {
   return (
     <div
-      className="min-w-[80vw] animate-pulse rounded-xl border border-border bg-card md:min-w-0"
-      style={{ height: 200 }}
+      className="min-w-[80vw] animate-pulse overflow-hidden rounded-xl border border-border bg-card md:min-w-0"
+      style={{ width: 280, height: 200 }}
     >
       <div className="aspect-[4/3] w-full animate-pulse bg-muted" />
       <div className="space-y-2 p-4">
@@ -32,25 +32,15 @@ export default function DestinationsSection() {
   const fetchDestinations = useCallback(async () => {
     setLoading(true);
     setError(false);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const data = await Promise.race([
-        getFeaturedDestinations(),
-        new Promise<never>((_, reject) => {
-          controller.signal.addEventListener("abort", () =>
-            reject(new Error("Request timeout"))
-          );
-          clearTimeout(timeoutId);
-        }),
-      ]);
-
-      clearTimeout(timeoutId);
+      const data = await getFeaturedDestinations(controller.signal);
       setDestinations(data.slice(0, MAX_CARDS));
     } catch {
       setError(true);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, []);

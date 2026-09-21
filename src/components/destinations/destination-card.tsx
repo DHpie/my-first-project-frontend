@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Destination } from "@/api/destinations";
-import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
 interface DestinationCardProps {
   destination: Destination;
@@ -12,11 +11,9 @@ interface DestinationCardProps {
 
 export default function DestinationCard({ destination }: DestinationCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
-  const ref = useScrollReveal<HTMLAnchorElement>();
 
   return (
     <Link
-      ref={ref}
       href={`/destinations/${destination.slug}`}
       className="group block min-w-[80vw] snap-start md:min-w-0"
       aria-label={`Explore ${destination.cityName}`}
@@ -33,7 +30,7 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
               onError={() => setImageFailed(true)}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-400 to-purple-600">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-500 to-gray-700">
               <span className="text-lg font-bold text-white">
                 {destination.cityName}
               </span>

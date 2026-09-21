@@ -10,9 +10,12 @@ export interface CommunityPost {
   likeCount: number;
 }
 
-export async function getFeaturedPosts(): Promise<CommunityPost[]> {
+export async function getFeaturedPosts(
+  signal?: AbortSignal
+): Promise<CommunityPost[]> {
   const response = await request.get<Result<CommunityPost[]>>(
-    "/api/posts/featured"
+    "/api/posts/featured",
+    { signal }
   );
   return response.data.data;
 }

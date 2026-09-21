@@ -55,17 +55,42 @@ export default function AIWidget() {
     }
   }, [isOpen]);
 
-  // Escape key handler
+  // Escape key handler + focus trap
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsOpen(false);
+        return;
+      }
+      if (e.key === "Tab") {
+        const dialog = document.querySelector('[role="dialog"]');
+        if (!dialog) return;
+        const focusable = dialog.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
+
+  // Listen for custom event from header AI assistant link
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener("open-ai-widget", handleOpen);
+    return () => window.removeEventListener("open-ai-widget", handleOpen);
+  }, []);
 
   const sendMessage = useCallback(
     async (messageText: string) => {
@@ -81,14 +106,11 @@ export default function AIWidget() {
       lastUserMessageRef.current = messageText.trim();
       setMessages((prev) => {
         const next = [...prev, userMessage];
-        // Enforce max messages limit (keep welcome + latest)
-        if (next.length > MAX_MESSAGES + 1) {
-          const welcome = next[0];
-          const trimmed = next.slice(next.length - MAX_MESSAGES);
-          if (welcome.id !== "welcome") {
-            return trimmed;
-          }
-          return [welcome, ...trimmed.filter((m) => m.id !== "welcome")];
+        if (next.length > MAX_MESSAGES) {
+          const welcome = next.find((m) => m.id === "welcome");
+          const nonWelcome = next.filter((m) => m.id !== "welcome");
+          const kept = nonWelcome.slice(-(MAX_MESSAGES - 1));
+          return welcome ? [welcome, ...kept] : kept;
         }
         return next;
       });
@@ -120,13 +142,11 @@ export default function AIWidget() {
         };
         setMessages((prev) => {
           const next = [...prev, aiMessage];
-          if (next.length > MAX_MESSAGES + 1) {
-            const welcome = next[0];
-            const trimmed = next.slice(next.length - MAX_MESSAGES);
-            if (welcome.id !== "welcome") {
-              return trimmed;
-            }
-            return [welcome, ...trimmed.filter((m) => m.id !== "welcome")];
+          if (next.length > MAX_MESSAGES) {
+            const welcome = next.find((m) => m.id === "welcome");
+            const nonWelcome = next.filter((m) => m.id !== "welcome");
+            const kept = nonWelcome.slice(-(MAX_MESSAGES - 1));
+            return welcome ? [welcome, ...kept] : kept;
           }
           return next;
         });

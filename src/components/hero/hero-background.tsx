@@ -14,7 +14,7 @@ export default function HeroBackground({ src, alt }: HeroBackgroundProps) {
   return (
     <>
       {/* Base background color for fallback */}
-      <div className="absolute inset-0 bg-[var(--background)]" />
+      <div className="absolute inset-0 bg-[#1a1a2e]" />
 
       {/* Background image */}
       {!failed && (
@@ -28,20 +28,6 @@ export default function HeroBackground({ src, alt }: HeroBackgroundProps) {
         />
       )}
 
-      {/* Brand gradient overlay */}
-      <div
-        className="absolute inset-0"
-        style={{ background: "var(--gradient-hero-overlay)" }}
-      />
-
-      {/* Bottom fade to page background */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[30%]"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent 0%, var(--background) 100%)",
-        }}
-      />
     </>
   );
 }

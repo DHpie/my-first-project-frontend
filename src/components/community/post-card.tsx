@@ -7,7 +7,6 @@ import { User } from "lucide-react";
 import { Heart } from "lucide-react";
 import type { CommunityPost } from "@/api/posts";
 import { truncateExcerpt, formatLikeCount } from "@/lib/format";
-import { useScrollReveal } from "@/lib/use-scroll-reveal";
 
 interface PostCardProps {
   post: CommunityPost;
@@ -15,11 +14,9 @@ interface PostCardProps {
 
 export default function PostCard({ post }: PostCardProps) {
   const [avatarFailed, setAvatarFailed] = useState(false);
-  const ref = useScrollReveal<HTMLAnchorElement>();
 
   return (
     <Link
-      ref={ref}
       href={`/community/posts/${post.id}`}
       className="group/post relative block overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none"
       aria-label={`Read post: ${post.title}`}

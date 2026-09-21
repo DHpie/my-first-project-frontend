@@ -29,25 +29,15 @@ export default function CommunitySection() {
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     setError(false);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const data = await Promise.race([
-        getFeaturedPosts(),
-        new Promise<never>((_, reject) => {
-          controller.signal.addEventListener("abort", () =>
-            reject(new Error("Request timeout"))
-          );
-          clearTimeout(timeoutId);
-        }),
-      ]);
-
-      clearTimeout(timeoutId);
+      const data = await getFeaturedPosts(controller.signal);
       setPosts(data.slice(0, MAX_POSTS));
     } catch {
       setError(true);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, []);

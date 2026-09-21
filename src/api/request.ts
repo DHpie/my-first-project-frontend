@@ -3,7 +3,10 @@ import type { Result } from '../types/user';
 
 const request = axios.create({
   baseURL: '/',
-  timeout: 10000,
+  // Default timeout aligned with the longest spec-defined timeout (AI chat: 15s).
+  // Shorter per-feature timeouts (e.g. destinations/community 10s) are enforced
+  // at the component layer via AbortController and will fire before this default.
+  timeout: 15000,
 });
 
 request.interceptors.response.use(

@@ -6,9 +6,22 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const MAX_LENGTH = 200;
+export interface SearchFormProps {
+  /** 搜索输入框占位文本 */
+  placeholder?: string;
+  /** 允许的最大输入长度 */
+  maxLength?: number;
+}
 
-export default function SearchForm() {
+const DEFAULTS = {
+  placeholder: "Search destinations, tips, or ask AI...",
+  maxLength: 200,
+};
+
+export default function SearchForm({
+  placeholder = DEFAULTS.placeholder,
+  maxLength = DEFAULTS.maxLength,
+}: SearchFormProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
@@ -32,29 +45,25 @@ export default function SearchForm() {
   };
 
   const handleChange = (value: string) => {
-    if (value.length > MAX_LENGTH) return;
+    if (value.length > maxLength) {
+      setError(`Search query is too long (max ${maxLength} characters)`);
+      return;
+    }
     setQuery(value);
     if (error) setError("");
   };
 
   return (
-    <div
-      className="w-full max-w-lg mx-auto"
-      style={{
-        animation:
-          "fade-slide-up 500ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both",
-      }}
-    >
+    <div className="w-full max-w-lg mx-auto">
       <form onSubmit={handleSubmit} className="w-full" noValidate>
-        <div className="flex items-center gap-2 rounded-full backdrop-blur-md bg-white/15 border border-white/25 px-3 py-2 focus-within:ring-2 focus-within:ring-[#D4A017]/50">
+        <div className="flex items-center gap-2 rounded-full backdrop-blur-md bg-white/15 border border-white/25 px-3 py-2">
           <Input
             type="text"
-            placeholder="Search destinations, tips, or ask AI..."
+            placeholder={placeholder}
             value={query}
             onChange={(e) => handleChange(e.target.value)}
-            maxLength={MAX_LENGTH}
             aria-label="Search destinations, tips, or ask AI"
-            className="flex-1 bg-transparent border-none text-white placeholder:text-white/60 focus-visible:ring-0 focus-visible:border-none shadow-none"
+            className="flex-1 bg-transparent border-none text-white placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-[#D4A017]/50 focus-visible:border-none shadow-none"
             disabled={isNavigating}
           />
           <Button
