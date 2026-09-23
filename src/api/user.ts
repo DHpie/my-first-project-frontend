@@ -6,8 +6,8 @@ export async function getUsers(): Promise<User[]> {
   return response.data.data;
 }
 
-export async function getUserById(id: number): Promise<User> {
-  const response = await request.get<Result<User>>(`/api/users/${id}`);
+export async function getUserByUuid(uuid: string): Promise<User> {
+  const response = await request.get<Result<User>>(`/api/users/${uuid}`);
   return response.data.data;
 }
 
@@ -16,11 +16,11 @@ export async function createUser(data: UserCreateRequest): Promise<User> {
   return response.data.data;
 }
 
-export async function updateUser(id: number, data: UserUpdateRequest): Promise<User> {
-  const response = await request.put<Result<User>>(`/api/users/${id}`, data);
+export async function updateUser(uuid: string, data: UserUpdateRequest): Promise<User> {
+  const response = await request.put<Result<User>>(`/api/users/${uuid}`, data);
   return response.data.data;
 }
 
-export async function deleteUser(id: number): Promise<void> {
-  await request.delete<Result<void>>(`/api/users/${id}`);
+export async function deleteUser(uuid: string): Promise<void> {
+  await request.delete<Result<void>>(`/api/users/${uuid}`);
 }

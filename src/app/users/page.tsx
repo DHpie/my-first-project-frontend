@@ -14,7 +14,7 @@ export default function UserManagement() {
   const [newEmail, setNewEmail] = useState('');
 
   // Edit form
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editUsername, setEditUsername] = useState('');
   const [editEmail, setEditEmail] = useState('');
 
@@ -50,7 +50,7 @@ export default function UserManagement() {
   };
 
   const handleEditStart = (user: User) => {
-    setEditingId(user.id);
+    setEditingId(user.uuid);
     setEditUsername(user.username);
     setEditEmail(user.email);
   };
@@ -74,10 +74,10 @@ export default function UserManagement() {
     setEditingId(null);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (uuid: string) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await deleteUser(id);
+      await deleteUser(uuid);
       fetchUsers();
     } catch (err) {
       setError((err as Error).message);
@@ -127,7 +127,7 @@ export default function UserManagement() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f5f5f5', textAlign: 'left' }}>
-              <th style={{ padding: 10, borderBottom: '2px solid #ddd' }}>ID</th>
+              <th style={{ padding: 10, borderBottom: '2px solid #ddd' }}>UUID</th>
               <th style={{ padding: 10, borderBottom: '2px solid #ddd' }}>Username</th>
               <th style={{ padding: 10, borderBottom: '2px solid #ddd' }}>Email</th>
               <th style={{ padding: 10, borderBottom: '2px solid #ddd' }}>Created At</th>
@@ -136,17 +136,17 @@ export default function UserManagement() {
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id}>
-                <td style={{ padding: 10, borderBottom: '1px solid #eee' }}>{user.id}</td>
+              <tr key={user.uuid}>
+                <td style={{ padding: 10, borderBottom: '1px solid #eee', fontSize: 12, fontFamily: 'monospace' }}>{user.uuid}</td>
                 <td style={{ padding: 10, borderBottom: '1px solid #eee' }}>
-                  {editingId === user.id ? (
+                  {editingId === user.uuid ? (
                     <input value={editUsername} onChange={(e) => setEditUsername(e.target.value)} style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: 4 }} />
                   ) : (
                     user.username
                   )}
                 </td>
                 <td style={{ padding: 10, borderBottom: '1px solid #eee' }}>
-                  {editingId === user.id ? (
+                  {editingId === user.uuid ? (
                     <input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} type="email" style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: 4 }} />
                   ) : (
                     user.email
@@ -154,7 +154,7 @@ export default function UserManagement() {
                 </td>
                 <td style={{ padding: 10, borderBottom: '1px solid #eee' }}>{user.createdAt}</td>
                 <td style={{ padding: 10, borderBottom: '1px solid #eee' }}>
-                  {editingId === user.id ? (
+                  {editingId === user.uuid ? (
                     <>
                       <button onClick={handleEditSave} style={{ padding: '4px 10px', marginRight: 4, background: '#2196F3', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Save</button>
                       <button onClick={handleEditCancel} style={{ padding: '4px 10px', background: '#999', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Cancel</button>
@@ -162,7 +162,7 @@ export default function UserManagement() {
                   ) : (
                     <>
                       <button onClick={() => handleEditStart(user)} style={{ padding: '4px 10px', marginRight: 4, background: '#FF9800', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Edit</button>
-                      <button onClick={() => handleDelete(user.id)} style={{ padding: '4px 10px', background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Delete</button>
+                      <button onClick={() => handleDelete(user.uuid)} style={{ padding: '4px 10px', background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Delete</button>
                     </>
                   )}
                 </td>
