@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AlertCircle, Loader2, Pencil, User } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getProfile } from '@/api/profile';
 import { getCurrentUserUuid } from '@/lib/auth';
@@ -85,7 +86,10 @@ export default function ProfilePage() {
             width={96}
             height={96}
             className="h-20 w-20 rounded-full object-cover ring-2 ring-border md:h-24 md:w-24"
-            onError={() => setAvatarFailed(true)}
+            onError={() => {
+              setAvatarFailed(true);
+              toast.error('Failed to load avatar', { duration: 3000 });
+            }}
           />
         ) : (
           <div

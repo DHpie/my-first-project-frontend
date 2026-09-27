@@ -231,8 +231,8 @@ export default function ProfileEditPage() {
       <button
         type="button"
         onClick={handleCancel}
-        className="mb-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         aria-label="Go back to profile page"
+        className="mb-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
         Back to Profile
@@ -241,9 +241,9 @@ export default function ProfileEditPage() {
       <div className="space-y-6">
         {/* 头像上传区域 */}
         <div className="flex flex-col items-center gap-2">
-          <div className="relative" onClick={handleAvatarClick}>
+          <div className="relative">
             {avatarUrl ? (
-              <div className="relative cursor-pointer">
+              <div className="relative">
                 <Image
                   src={avatarUrl}
                   alt="Profile photo preview"
@@ -258,13 +258,13 @@ export default function ProfileEditPage() {
                 )}
               </div>
             ) : (
-              <div className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-full bg-muted">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
                 <User className="size-10 text-muted-foreground" />
               </div>
             )}
-            {/* 悬浮遮罩 */}
+            {/* 悬浮遮罩（仅视觉提示，点击由下方按钮触发） */}
             {!avatarUploading && (
-              <div className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100">
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                 <Camera className="size-6 text-white" />
               </div>
             )}
@@ -282,6 +282,7 @@ export default function ProfileEditPage() {
             type="file"
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
+            aria-label="Upload profile photo"
             onChange={handleFileChange}
             disabled={isSaving}
           />
@@ -336,8 +337,7 @@ export default function ProfileEditPage() {
             disabled={isSaving}
             aria-label="Bio"
             aria-describedby="bio-counter"
-            className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
-            style={{ maxHeight: '120px' }}
+            className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 max-h-[120px]"
           />
           <div className="flex justify-end">
             <span
@@ -419,28 +419,6 @@ export default function ProfileEditPage() {
   );
 }
 
-function EditSkeleton() {
-  return (
-    <div className="flex flex-col items-center gap-5">
-      <div className="h-24 w-24 animate-pulse rounded-full bg-muted" />
-      <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-      <div className="w-full space-y-2">
-        <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-        <div className="h-10 w-full animate-pulse rounded-lg bg-muted" />
-      </div>
-      <div className="w-full space-y-2">
-        <div className="h-4 w-12 animate-pulse rounded bg-muted" />
-        <div className="h-20 w-full animate-pulse rounded-lg bg-muted" />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-8 w-24 animate-pulse rounded-full bg-muted" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function EditErrorState({ onRetry }: { onRetry: () => void }) {
   const [retrying, setRetrying] = useState(false);
 
@@ -467,6 +445,28 @@ function EditErrorState({ onRetry }: { onRetry: () => void }) {
           'Retry'
         )}
       </Button>
+    </div>
+  );
+}
+
+function EditSkeleton() {
+  return (
+    <div className="flex flex-col items-center gap-5">
+      <div className="h-24 w-24 animate-pulse rounded-full bg-muted" />
+      <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+      <div className="w-full space-y-2">
+        <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+        <div className="h-10 w-full animate-pulse rounded-lg bg-muted" />
+      </div>
+      <div className="w-full space-y-2">
+        <div className="h-4 w-12 animate-pulse rounded bg-muted" />
+        <div className="h-20 w-full animate-pulse rounded-lg bg-muted" />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-8 w-24 animate-pulse rounded-full bg-muted" />
+        ))}
+      </div>
     </div>
   );
 }
