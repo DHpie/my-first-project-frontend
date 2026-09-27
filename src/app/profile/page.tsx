@@ -52,10 +52,10 @@ export default function ProfilePage() {
     document.title = 'My Profile - ChinaBuddy';
   }, []);
 
-  // loading 或 unauthorized 时不渲染内容
+  // loading �?unauthorized 时不渲染内容
   if (state === 'loading' || state === 'unauthorized') {
     return (
-      <main className="mx-auto max-w-[400px] px-4 py-8 md:max-w-[560px]">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[480px] px-4 py-8 md:max-w-[640px]" aria-label="My Profile">
         <ProfileSkeleton />
       </main>
     );
@@ -63,7 +63,7 @@ export default function ProfilePage() {
 
   if (state === 'error') {
     return (
-      <main className="mx-auto flex min-h-[60vh] max-w-[400px] flex-col items-center justify-center px-4 md:max-w-[560px]">
+      <main id="main-content" tabIndex={-1} className="mx-auto flex min-h-[60vh] max-w-[480px] flex-col items-center justify-center px-4 md:max-w-[640px]" aria-label="My Profile">
         <ErrorState onRetry={fetchProfile} />
       </main>
     );
@@ -75,7 +75,7 @@ export default function ProfilePage() {
   const hasAvatar = profile.avatarUrl && !avatarFailed;
 
   return (
-    <main className="mx-auto max-w-[400px] px-4 py-8 md:max-w-[560px]">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-[480px] px-4 py-8 md:max-w-[640px]" aria-label="My Profile">
       <div className="flex flex-col items-center gap-6">
         {/* 头像 */}
         {hasAvatar ? (
@@ -90,7 +90,7 @@ export default function ProfilePage() {
         ) : (
           <div
             className="flex h-20 w-20 items-center justify-center rounded-full bg-muted md:h-24 md:w-24"
-            aria-label="Default avatar"
+            aria-hidden="true"
           >
             <User className="size-8 text-muted-foreground md:size-10" />
           </div>
@@ -103,7 +103,7 @@ export default function ProfilePage() {
           <h1 className="text-center text-xl italic text-muted-foreground">Anonymous</h1>
         )}
 
-        {/* 简介 */}
+        {/* 简�?*/}
         <div className="w-full text-center">
           {profile.bio ? (
             <p className="mx-auto max-w-[400px] text-sm text-muted-foreground whitespace-pre-line">

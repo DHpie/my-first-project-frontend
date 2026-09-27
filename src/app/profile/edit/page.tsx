@@ -1,10 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowLeft, Camera, Check, Loader2, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Camera, Check, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getProfile, updateProfile, uploadAvatar, getTags } from '@/api/profile';
@@ -25,7 +24,7 @@ export default function ProfileEditPage() {
   const { toasts, show: showToast, dismiss: dismissToast } = useToast();
 
   const [state, setState] = useState<PageState>('loading');
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [, setProfile] = useState<Profile | null>(null);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   // 表单状态
@@ -212,7 +211,7 @@ export default function ProfileEditPage() {
   // loading / unauthorized 状态
   if (state === 'loading' || state === 'unauthorized') {
     return (
-      <main className="mx-auto max-w-[480px] px-4 py-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[480px] px-4 py-8 md:max-w-[640px]" aria-label="Edit Profile">
         <EditSkeleton />
       </main>
     );
@@ -220,23 +219,20 @@ export default function ProfileEditPage() {
 
   if (state === 'error') {
     return (
-      <main className="mx-auto flex min-h-[60vh] max-w-[480px] flex-col items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-base font-medium text-foreground">Something went wrong</p>
-          <p className="text-sm text-muted-foreground">Could not load your profile</p>
-          <Button variant="outline" onClick={fetchData}>Retry</Button>
-        </div>
+      <main id="main-content" tabIndex={-1} className="mx-auto flex min-h-[60vh] max-w-[480px] flex-col items-center justify-center px-4 md:max-w-[640px]" aria-label="Edit Profile">
+        <EditErrorState onRetry={fetchData} />
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-[480px] px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-[480px] px-4 py-8 md:max-w-[640px]" aria-label="Edit Profile">
       {/* 返回链接 */}
       <button
         type="button"
         onClick={handleCancel}
         className="mb-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        aria-label="Go back to profile page"
       >
         <ArrowLeft className="size-4" />
         Back to Profile
@@ -253,7 +249,7 @@ export default function ProfileEditPage() {
                   alt="Profile photo preview"
                   width={96}
                   height={96}
-                  className={`h-24 w-24 rounded-full object-cover transition-opacity ${avatarUploading ? 'opacity-50' : 'opacity-100'}`}
+                  className={`h-24 w-24 rounded-full object-cover transition-opacity ${avatarUploading ? 'opacity-50' : 'opacity-100 ring-2 ring-primary'}`}
                 />
                 {avatarUploading && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -390,7 +386,7 @@ export default function ProfileEditPage() {
       </div>
 
       {/* ActionBar */}
-      <div className="sticky bottom-0 mt-6 -mx-4 border-t border-border bg-background px-4 py-3 md:static md:border-0 md:bg-transparent md:px-0 md:py-0">
+      <div role="toolbar" aria-label="Profile actions" className="sticky bottom-0 mt-6 -mx-4 border-t border-border bg-background px-4 py-3 md:static md:border-0 md:bg-transparent md:px-0 md:py-0">
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
             Cancel
@@ -441,6 +437,36 @@ function EditSkeleton() {
           <div key={i} className="h-8 w-24 animate-pulse rounded-full bg-muted" />
         ))}
       </div>
+    </div>
+  );
+}
+
+function EditErrorState({ onRetry }: { onRetry: () => void }) {
+  const [retrying, setRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    await onRetry();
+    setRetrying(false);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <AlertCircle className="size-12 text-muted-foreground" />
+      <div>
+        <p className="text-base font-medium text-foreground">Something went wrong</p>
+        <p className="mt-1 text-sm text-muted-foreground">Could not load your profile</p>
+      </div>
+      <Button variant="outline" onClick={handleRetry} disabled={retrying}>
+        {retrying ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Retrying...
+          </>
+        ) : (
+          'Retry'
+        )}
+      </Button>
     </div>
   );
 }
