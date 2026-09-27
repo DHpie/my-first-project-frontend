@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AIAssistantButton from "./ai-assistant-button";
+import MessagesBell from "@/components/messages/messages-bell";
 
 export default function Header() {
   return (
@@ -15,7 +16,10 @@ export default function Header() {
           ChinaBuddy
         </Link>
 
-        <AIAssistantButton />
+        <div className="flex items-center gap-3">
+          <MessagesBell />
+          <AIAssistantButton />
+        </div>
       </div>
     </header>
   );
