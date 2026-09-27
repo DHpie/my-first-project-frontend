@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { User } from "lucide-react";
 import AIAssistantButton from "./ai-assistant-button";
 
 export default function Header() {
@@ -15,7 +16,18 @@ export default function Header() {
           ChinaBuddy
         </Link>
 
-        <AIAssistantButton />
+        <div className="flex items-center gap-3">
+          {/* Profile 入口（需登录后显示，当前阶段始终可见） */}
+          <Link
+            href="/profile"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="My Profile"
+          >
+            <User className="size-4" />
+            <span className="hidden sm:inline">Profile</span>
+          </Link>
+          <AIAssistantButton />
+        </div>
       </div>
     </header>
   );
