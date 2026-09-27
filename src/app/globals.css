@@ -164,6 +164,19 @@
     animation: fade-slide-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Notification badge bounce animation */
+@keyframes badge-bounce {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
 /* Respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {
     *,

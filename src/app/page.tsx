@@ -1,4 +1,3 @@
-import SkipToContent from "@/components/layout/skip-to-content";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import HeroSection from "@/components/hero/hero-section";
@@ -10,7 +9,6 @@ import AIWidget from "@/components/ai-widget/ai-widget";
 export default function Home() {
   return (
     <>
-      <SkipToContent />
       <Header />
 
       <main

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'i.pravatar.cc' },
+      { protocol: 'http', hostname: 'localhost' },
     ],
   },
   async rewrites() {
@@ -12,6 +13,10 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         destination: 'http://localhost:8080/api/:path*',
+      },
+      {
+        source: '/uploads/:path*',
+        destination: 'http://localhost:8080/uploads/:path*',
       },
     ];
   },
