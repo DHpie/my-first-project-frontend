@@ -39,6 +39,7 @@ const NotificationPanel = forwardRef<NotificationPanelHandle, NotificationPanelP
   const [loadMoreError, setLoadMoreError] = useState(false);
   const [markingAllRead, setMarkingAllRead] = useState(false);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const [nextPage, setNextPage] = useState(1);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const prevWsStatusRef = useRef<WsStatus>(wsStatus);
@@ -51,6 +52,7 @@ const NotificationPanel = forwardRef<NotificationPanelHandle, NotificationPanelP
       const data = await getNotifications(0, PAGE_SIZE);
       setNotifications(data.notifications);
       setHasMore(data.hasMore);
+      setNextPage(1);
       setPanelState(data.notifications.length === 0 ? 'empty' : 'data');
       setLoadMoreError(false);
     } catch {
@@ -159,16 +161,16 @@ const NotificationPanel = forwardRef<NotificationPanelHandle, NotificationPanelP
     setLoadingMore(true);
     setLoadMoreError(false);
     try {
-      const nextPage = Math.ceil(notifications.length / PAGE_SIZE);
       const data = await getNotifications(nextPage, PAGE_SIZE);
       setNotifications((prev) => [...prev, ...data.notifications]);
       setHasMore(data.hasMore);
+      setNextPage((p) => p + 1);
     } catch {
       setLoadMoreError(true);
     } finally {
       setLoadingMore(false);
     }
-  }, [notifications.length]);
+  }, [nextPage]);
 
   // Mark all as read
 
