@@ -53,7 +53,7 @@ export default function ProfilePage() {
     document.title = 'My Profile - ChinaBuddy';
   }, []);
 
-  // loading �?unauthorized 时不渲染内容
+  // loading 或 unauthorized 时不渲染内容
   if (state === 'loading' || state === 'unauthorized') {
     return (
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-[480px] px-4 py-8 md:max-w-[640px]" aria-label="My Profile">
@@ -107,7 +107,7 @@ export default function ProfilePage() {
           <h1 className="text-center text-xl italic text-muted-foreground">Anonymous</h1>
         )}
 
-        {/* 简�?*/}
+        {/* 简介 */}
         <div className="w-full text-center">
           {profile.bio ? (
             <p className="mx-auto max-w-[400px] text-sm text-muted-foreground whitespace-pre-line">
