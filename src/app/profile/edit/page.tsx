@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowLeft, Camera, Check, Loader2, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Camera, Check, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getProfile, updateProfile, uploadAvatar, getTags } from '@/api/profile';
@@ -25,7 +24,7 @@ export default function ProfileEditPage() {
   const { toasts, show: showToast, dismiss: dismissToast } = useToast();
 
   const [state, setState] = useState<PageState>('loading');
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [_profile, setProfile] = useState<Profile | null>(null);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   // 表单状态
@@ -221,11 +220,7 @@ export default function ProfileEditPage() {
   if (state === 'error') {
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-[480px] flex-col items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-base font-medium text-foreground">Something went wrong</p>
-          <p className="text-sm text-muted-foreground">Could not load your profile</p>
-          <Button variant="outline" onClick={fetchData}>Retry</Button>
-        </div>
+        <EditErrorState onRetry={fetchData} />
       </main>
     );
   }
@@ -236,6 +231,7 @@ export default function ProfileEditPage() {
       <button
         type="button"
         onClick={handleCancel}
+        aria-label="Back to profile"
         className="mb-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
@@ -245,9 +241,9 @@ export default function ProfileEditPage() {
       <div className="space-y-6">
         {/* 头像上传区域 */}
         <div className="flex flex-col items-center gap-2">
-          <div className="relative" onClick={handleAvatarClick}>
+          <div className="relative">
             {avatarUrl ? (
-              <div className="relative cursor-pointer">
+              <div className="relative">
                 <Image
                   src={avatarUrl}
                   alt="Profile photo preview"
@@ -262,13 +258,13 @@ export default function ProfileEditPage() {
                 )}
               </div>
             ) : (
-              <div className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-full bg-muted">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
                 <User className="size-10 text-muted-foreground" />
               </div>
             )}
-            {/* 悬浮遮罩 */}
+            {/* 悬浮遮罩（仅视觉提示，点击由下方按钮触发） */}
             {!avatarUploading && (
-              <div className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100">
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                 <Camera className="size-6 text-white" />
               </div>
             )}
@@ -286,6 +282,7 @@ export default function ProfileEditPage() {
             type="file"
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
+            aria-label="Upload profile photo"
             onChange={handleFileChange}
             disabled={isSaving}
           />
@@ -340,8 +337,7 @@ export default function ProfileEditPage() {
             disabled={isSaving}
             aria-label="Bio"
             aria-describedby="bio-counter"
-            className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
-            style={{ maxHeight: '120px' }}
+            className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 max-h-[120px]"
           />
           <div className="flex justify-end">
             <span
@@ -420,6 +416,36 @@ export default function ProfileEditPage() {
         onDiscard={handleDiscard}
       />
     </main>
+  );
+}
+
+function EditErrorState({ onRetry }: { onRetry: () => void }) {
+  const [retrying, setRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    await onRetry();
+    setRetrying(false);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <AlertCircle className="size-12 text-muted-foreground" />
+      <div>
+        <p className="text-base font-medium text-foreground">Something went wrong</p>
+        <p className="mt-1 text-sm text-muted-foreground">Could not load your profile</p>
+      </div>
+      <Button variant="outline" onClick={handleRetry} disabled={retrying}>
+        {retrying ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Retrying...
+          </>
+        ) : (
+          'Retry'
+        )}
+      </Button>
+    </div>
   );
 }
 
