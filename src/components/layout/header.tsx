@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { User } from "lucide-react";
 import AIAssistantButton from "./ai-assistant-button";
+import NotificationBell from "../notifications/notification-bell";
 
 export default function Header() {
   return (
@@ -26,6 +27,7 @@ export default function Header() {
             <User className="size-4" />
             <span className="hidden sm:inline">Profile</span>
           </Link>
+          <NotificationBell />
           <AIAssistantButton />
         </div>
       </div>
