@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, MessageCircle, Plus } from 'lucide-react';
+import { AlertCircle, MessageCircle, Plus, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/lib/use-auth';
@@ -198,6 +199,17 @@ export default function MessagesPage() {
               )}
             </div>
           )}
+
+          {/* 屏蔽列表入口 */}
+          <div className="border-t border-border py-4">
+            <Link
+              href="/messages/blocked"
+              className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Shield className="size-4" />
+              Blocked users
+            </Link>
+          </div>
         </>
       )}
 

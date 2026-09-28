@@ -5,19 +5,20 @@ import { Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getUnreadCount } from '@/api/notifications';
 import { useNotificationWs } from '@/lib/use-notification-ws';
+import { getCurrentUserUuid } from '@/lib/auth';
 import NotificationPanel, { type NotificationPanelHandle } from './notification-panel';
 import type { Notification } from '@/types/notification';
 
 /**
- * 从 localStorage 获取认证 token。
- * 项目暂无认证机制，待后续实现后对接。
+ * 模拟登录 token：从 localStorage 获取当前用户 UUID。
+ * 项目暂无真实认证机制，待后续实现后对接。
  */
 function useAuthToken(): string | null {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('auth_token');
-    setToken(stored);
+    const uuid = getCurrentUserUuid();
+    setToken(uuid);
   }, []);
 
   return token;

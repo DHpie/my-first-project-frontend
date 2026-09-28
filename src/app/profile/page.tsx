@@ -141,7 +141,7 @@ export default function ProfilePage() {
         </div>
 
         {/* 编辑按钮 */}
-        <Button variant="outline" render={<Link href="/profile/edit" aria-label="Edit profile" />}>
+        <Button variant="outline" nativeButton={false} render={<Link href="/profile/edit" aria-label="Edit profile" />}>
           <Pencil className="size-4" />
           Edit Profile
         </Button>

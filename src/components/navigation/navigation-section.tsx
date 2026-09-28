@@ -49,7 +49,7 @@ function NavCard({ card }: { card: NavigationCard }) {
   return (
     <Link
       href={card.href}
-      className="group relative flex-1 overflow-hidden rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all duration-200 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.98] outline-none"
+      className="group relative flex-1 overflow-hidden rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all duration-200 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.98] outline-none md:h-full"
     >
       <CardIcon icon={card.icon} />
       <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
@@ -61,7 +61,7 @@ function NavCard({ card }: { card: NavigationCard }) {
 export default function NavigationSection() {
   return (
     <section aria-label="Platform navigation" className="py-8 md:py-12">
-      <div className="flex flex-col space-y-4 md:flex md:flex-row md:gap-6">
+      <div className="flex flex-col space-y-4 md:flex md:flex-row md:items-stretch md:gap-6">
         {CARDS.map((card) => (
           <NavCard key={card.id} card={card} />
         ))}
