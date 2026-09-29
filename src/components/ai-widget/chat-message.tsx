@@ -16,7 +16,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
   if (isSystem) {
     return (
-      <div className="px-3 py-2 text-center text-sm text-destructive">
+      <div className="px-3 py-2 text-center text-sm text-destructive" role="alert">
         {message.content}
       </div>
     );
@@ -25,7 +25,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm shadow-sm ${
           isUser
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground"

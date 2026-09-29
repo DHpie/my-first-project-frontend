@@ -28,6 +28,7 @@ export default function AIWidget() {
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [validationError, setValidationError] = useState("");
@@ -52,6 +53,7 @@ export default function AIWidget() {
 
     if (!hasLoadedHistory.current) {
       hasLoadedHistory.current = true;
+      setIsLoadingHistory(true);
       (async () => {
         try {
           const history = await getChatHistory();
@@ -70,6 +72,8 @@ export default function AIWidget() {
           }
         } catch {
           setMessages([WELCOME_MESSAGE]);
+        } finally {
+          setIsLoadingHistory(false);
         }
         setTimeout(() => inputRef.current?.focus(), 100);
       })();
@@ -256,6 +260,7 @@ export default function AIWidget() {
     } catch {
       // Ignore archive errors
     }
+    hasLoadedHistory.current = false;
     setConversationId(null);
     setMessages([WELCOME_MESSAGE]);
     setError(false);
@@ -293,9 +298,14 @@ export default function AIWidget() {
       {isOpen && (
         <div
           role="dialog"
+          aria-modal="true"
           aria-label="AI travel assistant chat"
-          className="mb-3 flex w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-lg max-[480px]:h-[70vh] min-[480px]:h-[480px] min-[480px]:w-[360px]"
+          className="mb-3 flex w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-lg max-[480px]:h-[70vh] min-[480px]:h-[560px] min-[480px]:w-[420px]"
+          style={{ animation: "fade-slide-up 300ms cubic-bezier(0.16, 1, 0.3, 1) both" }}
         >
+          {/* Brand gradient accent */}
+          <div className="h-[2px] bg-gradient-to-r from-primary via-accent to-primary" />
+
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
@@ -305,7 +315,7 @@ export default function AIWidget() {
             <div className="flex items-center gap-1">
               <button
                 onClick={handleNewChat}
-                className="rounded-full p-1 transition-colors hover:bg-muted"
+                className="rounded-full p-1 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
                 aria-label="New chat"
                 title="New chat"
               >
@@ -313,7 +323,7 @@ export default function AIWidget() {
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-full p-1 transition-colors hover:bg-muted"
+                className="rounded-full p-1 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
                 aria-label="Close chat"
               >
                 <X className="h-4 w-4" />
@@ -322,10 +332,23 @@ export default function AIWidget() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 space-y-3 overflow-y-auto p-4">
-            {messages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} />
-            ))}
+          <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite" aria-atomic="false" aria-label="Chat messages" role="log">
+            {isLoadingHistory ? (
+              <>
+                <div className="h-4 w-3/4 animate-pulse rounded-lg bg-muted" />
+                <div className="h-4 w-1/2 animate-pulse rounded-lg bg-muted" />
+                <div className="h-4 w-2/3 animate-pulse rounded-lg bg-muted" />
+              </>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  {...(msg.streaming ? { role: "status", "aria-busy": "true" } : {})}
+                >
+                  <ChatMessage message={msg} />
+                </div>
+              ))
+            )}
             {error && (
               <div className="flex flex-col items-center gap-2 py-2">
                 <Button

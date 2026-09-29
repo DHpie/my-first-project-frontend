@@ -27,7 +27,9 @@ export async function* streamChat(
   conversationId: number | null,
   signal: AbortSignal
 ): AsyncGenerator<SseChunkData> {
-  const response = await fetch("/api/ai/chat/stream", {
+  // Direct backend call to bypass Next.js rewrite proxy (which buffers SSE responses)
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const response = await fetch(`${baseUrl}/api/ai/chat/stream`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
