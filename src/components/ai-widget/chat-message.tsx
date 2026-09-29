@@ -3,6 +3,7 @@ export interface ChatMessageData {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp: Date;
+  streaming?: boolean;
 }
 
 interface ChatMessageProps {
@@ -31,6 +32,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         }`}
       >
         {message.content}
+        {message.streaming && (
+          <span className="ml-0.5 inline-block animate-pulse">▊</span>
+        )}
       </div>
     </div>
   );
