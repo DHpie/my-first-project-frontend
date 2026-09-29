@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
-import { Bot, Send, X } from "lucide-react";
+import { Bot, Send, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { chat } from "@/api/ai";
+import { streamChat, getChatHistory, archiveConversation } from "@/api/ai";
 import ChatMessage, { type ChatMessageData } from "./chat-message";
-import TypingIndicator from "./typing-indicator";
 
 const MAX_MESSAGES = 50;
 const MAX_INPUT_LENGTH = 500;
-const CHAT_TIMEOUT_MS = 15000;
+const STREAM_TIMEOUT_MS = 30000;
 
 const WELCOME_MESSAGE: ChatMessageData = {
   id: "welcome",
@@ -28,7 +27,8 @@ export default function AIWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [conversationId, setConversationId] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [validationError, setValidationError] = useState("");
 
@@ -36,22 +36,45 @@ export default function AIWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastUserMessageRef = useRef<string>("");
+  const hasLoadedHistory = useRef(false);
 
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, isStreaming]);
 
-  // Focus management: open → input, close → button
+  // Load history on first open, then focus input
   useEffect(() => {
-    if (isOpen) {
-      // Add welcome message on first open
-      if (messages.length === 0) {
-        setMessages([WELCOME_MESSAGE]);
-      }
-      setTimeout(() => inputRef.current?.focus(), 100);
-    } else {
+    if (!isOpen) {
       buttonRef.current?.focus();
+      return;
+    }
+
+    if (!hasLoadedHistory.current) {
+      hasLoadedHistory.current = true;
+      (async () => {
+        try {
+          const history = await getChatHistory();
+          if (history.messages.length > 0) {
+            setConversationId(history.conversationId);
+            setMessages(
+              history.messages.map((m) => ({
+                id: `hist-${m.id}`,
+                role: m.role,
+                content: m.content,
+                timestamp: new Date(m.createdAt),
+              }))
+            );
+          } else {
+            setMessages([WELCOME_MESSAGE]);
+          }
+        } catch {
+          setMessages([WELCOME_MESSAGE]);
+        }
+        setTimeout(() => inputRef.current?.focus(), 100);
+      })();
+    } else {
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
 
@@ -92,9 +115,17 @@ export default function AIWidget() {
     return () => window.removeEventListener("open-ai-widget", handleOpen);
   }, []);
 
+  const trimMessages = useCallback((msgs: ChatMessageData[]) => {
+    if (msgs.length <= MAX_MESSAGES) return msgs;
+    const welcome = msgs.find((m) => m.id === "welcome");
+    const nonWelcome = msgs.filter((m) => m.id !== "welcome");
+    const kept = nonWelcome.slice(-(MAX_MESSAGES - 1));
+    return welcome ? [welcome, ...kept] : kept;
+  }, []);
+
   const sendMessage = useCallback(
     async (messageText: string) => {
-      if (!messageText.trim()) return;
+      if (!messageText.trim() || isStreaming) return;
 
       const userMessage: ChatMessageData = {
         id: generateId(),
@@ -103,54 +134,95 @@ export default function AIWidget() {
         timestamp: new Date(),
       };
 
+      const aiMessageId = generateId();
+      const aiMessage: ChatMessageData = {
+        id: aiMessageId,
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+        streaming: true,
+      };
+
       lastUserMessageRef.current = messageText.trim();
-      setMessages((prev) => {
-        const next = [...prev, userMessage];
-        if (next.length > MAX_MESSAGES) {
-          const welcome = next.find((m) => m.id === "welcome");
-          const nonWelcome = next.filter((m) => m.id !== "welcome");
-          const kept = nonWelcome.slice(-(MAX_MESSAGES - 1));
-          return welcome ? [welcome, ...kept] : kept;
-        }
-        return next;
-      });
+      setMessages((prev) => trimMessages([...prev, userMessage]));
       setInputValue("");
       setValidationError("");
-      setIsLoading(true);
+      setIsStreaming(true);
       setError(false);
 
+      // Add the empty AI message that will be filled by streaming
+      setMessages((prev) => trimMessages([...prev, aiMessage]));
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
+
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
+        const stream = streamChat(messageText.trim(), conversationId, controller.signal);
 
-        const response = await Promise.race([
-          chat(messageText.trim()),
-          new Promise<never>((_, reject) => {
-            controller.signal.addEventListener("abort", () =>
-              reject(new Error("Request timeout"))
+        for await (const chunk of stream) {
+          clearTimeout(timeoutId);
+
+          if (chunk.error) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiMessageId
+                  ? { ...m, content: "", streaming: false }
+                  : m
+              )
             );
-            clearTimeout(timeoutId);
-          }),
-        ]);
-        clearTimeout(timeoutId);
-
-        const aiMessage: ChatMessageData = {
-          id: generateId(),
-          role: "assistant",
-          content: response.reply,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => {
-          const next = [...prev, aiMessage];
-          if (next.length > MAX_MESSAGES) {
-            const welcome = next.find((m) => m.id === "welcome");
-            const nonWelcome = next.filter((m) => m.id !== "welcome");
-            const kept = nonWelcome.slice(-(MAX_MESSAGES - 1));
-            return welcome ? [welcome, ...kept] : kept;
+            const errorMsg: ChatMessageData = {
+              id: generateId(),
+              role: "system",
+              content: chunk.error,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorMsg]);
+            setIsStreaming(false);
+            return;
           }
-          return next;
-        });
+
+          if (chunk.done) {
+            if (chunk.conversationId) {
+              setConversationId(chunk.conversationId);
+            }
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiMessageId
+                  ? { ...m, streaming: false }
+                  : m
+              )
+            );
+            setIsStreaming(false);
+            return;
+          }
+
+          if (chunk.content) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiMessageId
+                  ? { ...m, content: m.content + chunk.content }
+                  : m
+              )
+            );
+          }
+        }
+
+        // Stream ended without done chunk (fallback)
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiMessageId ? { ...m, streaming: false } : m
+          )
+        );
+        setIsStreaming(false);
       } catch {
+        clearTimeout(timeoutId);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiMessageId
+              ? { ...m, content: m.content || "", streaming: false }
+              : m
+          )
+        );
         setError(true);
         const errorMessage: ChatMessageData = {
           id: generateId(),
@@ -159,16 +231,14 @@ export default function AIWidget() {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsLoading(false);
+        setIsStreaming(false);
       }
     },
-    []
+    [conversationId, isStreaming, trimMessages]
   );
 
   const handleRetry = useCallback(() => {
     if (lastUserMessageRef.current) {
-      // Remove the last system error message
       setMessages((prev) => {
         const lastSystemIdx = prev.findLastIndex((m) => m.role === "system");
         if (lastSystemIdx >= 0) {
@@ -180,10 +250,20 @@ export default function AIWidget() {
     }
   }, [sendMessage]);
 
+  const handleNewChat = useCallback(async () => {
+    try {
+      await archiveConversation();
+    } catch {
+      // Ignore archive errors
+    }
+    setConversationId(null);
+    setMessages([WELCOME_MESSAGE]);
+    setError(false);
+  }, []);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-
-    if (isLoading) return;
+    if (isStreaming) return;
 
     const trimmed = inputValue.trim();
     if (!trimmed) {
@@ -222,13 +302,23 @@ export default function AIWidget() {
               <Bot className="h-5 w-5 text-primary" />
               <span className="text-sm font-semibold">AI Travel Assistant</span>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="rounded-full p-1 transition-colors hover:bg-muted"
-              aria-label="Close chat"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleNewChat}
+                className="rounded-full p-1 transition-colors hover:bg-muted"
+                aria-label="New chat"
+                title="New chat"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-full p-1 transition-colors hover:bg-muted"
+                aria-label="Close chat"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Messages Area */}
@@ -236,7 +326,6 @@ export default function AIWidget() {
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} />
             ))}
-            {isLoading && <TypingIndicator />}
             {error && (
               <div className="flex flex-col items-center gap-2 py-2">
                 <Button
@@ -265,14 +354,14 @@ export default function AIWidget() {
                 aria-label="Type your message"
                 value={inputValue}
                 onChange={(e) => handleInputChange(e.target.value)}
-                disabled={isLoading}
+                disabled={isStreaming}
                 className="flex-1"
                 maxLength={MAX_INPUT_LENGTH}
               />
               <Button
                 type="submit"
                 size="icon"
-                disabled={isLoading}
+                disabled={isStreaming}
                 aria-label="Send message"
               >
                 <Send className="h-4 w-4" />
