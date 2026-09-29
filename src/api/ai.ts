@@ -15,8 +15,11 @@ export async function chat(message: string): Promise<ChatResponse> {
   return response.data.data;
 }
 
+// TODO: Replace with dynamic user ID after auth implementation
+const CURRENT_USER_ID = '1';
+
 function getUserId(): string {
-  return localStorage.getItem("user_uuid") || "1";
+  return CURRENT_USER_ID;
 }
 
 export async function* streamChat(
