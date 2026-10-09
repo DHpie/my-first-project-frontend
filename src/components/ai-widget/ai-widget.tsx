@@ -192,7 +192,7 @@ export default function AIWidget() {
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === aiMessageId
-                  ? { ...m, streaming: false }
+                  ? { ...m, streaming: false, sources: chunk.sources }
                   : m
               )
             );

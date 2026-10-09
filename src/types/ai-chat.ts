@@ -16,9 +16,16 @@ export interface AiChatMessage {
   createdAt: string;
 }
 
+export interface SourceRef {
+  type: "DESTINATION" | "POST";
+  name: string;
+  id: number;
+}
+
 export interface SseChunkData {
   content: string;
   done?: boolean;
   conversationId?: number;
+  sources?: SourceRef[];
   error?: string;
 }
